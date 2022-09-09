@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Prepub Downloader</title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+		<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+	</head>
+
+	<body>
+		<div class="container">
+			<div>
+				<form id="PrepubForm" action="/" method="POST">
+					<h3>J-Novel Club Prepub Downloader</h3>
+					<h4>Paste the URL of the series and specify what parts to download</h4>
+					<fieldset>
+                        <label for="JNC_URL">J-Novel Club URL:</label>
+						<input id="JNC_URL" placeholder="https://j-novel.club/series/her-majesty-s-swarm" name="jnovelclub_url" type="text" tabindex="1" required autofocus>
+                        <label for="JNC_PARTS">Prepub parts:</label>
+                        <input id="JNC_PARTS" placeholder="4.1:4.2" name="prepub_parts" type="text" tabindex="1" autofocus>
+					</fieldset>
+					<fieldset>
+						<div style="text-align:center;">
+							<button name="submit" type="submit" id="FormSubmit" data-submit="...Sending">Submit</button>
+						</div>
+					</fieldset>
+                    <footer id="footer">
+                        Parts:
+                        <br>
+                        Specify a range of parts to download in the form of [vol].[part]:[vol].[part]
+                        <br>
+                        Default: All the content linked by the URL. This will be a single part, a volume or the whole series
+                        <br>
+                    </footer>
+				</form>
+			</div>
+		</div>
+	</body>
+</html>

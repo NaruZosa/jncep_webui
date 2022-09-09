@@ -1,0 +1,13 @@
+---
+services:
+  jncep-webui:
+    #image: jncep-webui
+    build: .
+    environment:
+      - JNCEP_EMAIL=${JNCEP_EMAIL}
+      - JNCEP_PASSWORD=${JNCEP_PASSWORD}
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./logs:/logs
+    restart: unless-stopped

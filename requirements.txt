@@ -1,0 +1,4 @@
+Flask==2.2.2
+Waitress==2.1.2
+jncep==38
+loguru==0.6.0
