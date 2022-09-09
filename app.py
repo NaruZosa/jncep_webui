@@ -37,7 +37,7 @@ def make_one_bytesio_file(directory):
     # Path glob doesn't support len as it is a generator, so it needs to be turned into a list
     files = list(Path(directory).glob('*.epub'))
     if len(list(files)) == 1:
-        # Single file, but read into a BytesIO object so the actual file can be deleted
+        # Single file, but read into a BytesIO object so the actual file can be deleted later
         with open(files[0], "rb") as file:
             memory_file = BytesIO(file.read())
         return memory_file, files[0].name
@@ -107,12 +107,9 @@ if __name__ == "__main__":
     logger.add(sys.stderr, colorize=True,
                format="<level>{time:YYYY-MM-DD at HH:mm:ss} [{level}]</level> - {message}",
                level="DEBUG")
-    logger.add("logs/jncep.log", level="DEBUG",
+    logger.add("/logs/jncep.log", level="DEBUG",
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
                rotation="50 MB", compression="zip", retention="1 week")
-    # Clear trio RuntimeWarning: "custom sys.excepthook handler installed".
-    # This is an issue with Click and out of our control
-    os.system('cls')
     logger.info("JNCEP server starting")
 
     args = {"email": os.environ['JNCEP_EMAIL'], "password": os.environ['JNCEP_PASSWORD'],

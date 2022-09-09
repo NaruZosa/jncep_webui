@@ -1,4 +1,6 @@
+Edit docker file to build locally
 docker-compose up   - For testing. Confirm the web UI works and downloads work.
 docker build --tag bradleyds2/jnovelclub --tag bradleyds2/jnovelclub:v38.0 .  (or whatever version jncep is at, and is listed in the requirements as)
 docker push bradleyds2/jnovelclub:v38.0  (or whatever version jncep is at, and is listed in the requirements as)
 docker push bradleyds2/jnovelclub:latest
+Edit docker file to load from bradleyds2/jnovelclub

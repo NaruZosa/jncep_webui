@@ -8,5 +8,6 @@ COPY templates templates/
 COPY static static/
 RUN mkdir -p /epub
 RUN mkdir -p /logs
+RUN chmod -R 777 /logs # Probably not needed
 ENV JNCEP_OUTPUT=/epub
 CMD [ "python3", "-m" , "app"]
