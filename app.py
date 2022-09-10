@@ -1,4 +1,4 @@
-"""Retry of app, but calling upon jncep directly"""
+"""JNCEP as a web application"""
 import logging
 import os
 import shutil
@@ -19,7 +19,7 @@ app = Flask(__name__)
 def create_epub(jnc_url, part_spec):
     """Create an epub file from a J-Novel Club URL and part specifier"""
     timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M_%f')
-    output_dirpath = f"{os.environ['JNCEP_OUTPUT']}/{request.remote_addr}/{timestamp}"
+    output_dirpath = f"{output_root}/{request.remote_addr}/{timestamp}"
     Path.mkdir(Path(output_dirpath), parents=True, exist_ok=True)
     logger.info(f"Generating epub(s) at {output_dirpath}")
     # Pass input to jncep per https://github.com/pallets/click/issues/40#issuecomment-326014129
@@ -85,7 +85,9 @@ def index():
 
 
 class InterceptHandler(logging.Handler):
+    """Intercept the stdlib logger"""
     def emit(self, record):
+        """Intercept the stdlib logger"""
         # Get corresponding Loguru level if it exists
         try:
             level = logger.level(record.levelname).name
@@ -110,10 +112,14 @@ if __name__ == "__main__":
     logger.add("/logs/jncep.log", level="DEBUG",
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
                rotation="50 MB", compression="zip", retention="1 week")
-    logger.info("JNCEP server starting")
 
     args = {"email": os.environ['JNCEP_EMAIL'], "password": os.environ['JNCEP_PASSWORD'],
             "is_by_volume": True, "is_extract_images": False, "is_extract_content": False,
             "is_not_replace_chars": False, "style_css_path": False}
+
+    if "JNCEP_OUTPUT" in os.environ:
+        output_root = os.environ["JNCEP_OUTPUT"]
+    else:
+        output_root = "/output"
 
     serve(app, host="0.0.0.0", port=5000)
