@@ -8,25 +8,44 @@ from datetime import datetime
 from io import BytesIO
 from pathlib import Path
 
-from flask import Flask, send_file, render_template, request
+from flask import Flask, send_file, render_template, request, abort, json
 from jncep.cli.epub import generate_epub
+from jncep.jncweb import BadWebURLError
 from loguru import logger
 from waitress import serve
 
 app = Flask(__name__)
 
 
-def create_epub(jnc_url, part_spec):
+def terminate_request(message, status_code=200):
+    """
+    Terminates early, presenting the requestor with the provided message and response code
+    :param message: Message to display to requestor
+    :param status_code: HTTP return code
+    """
+    data = {"message": message}
+    response = app.response_class(
+        response=json.dumps(data),
+        status=status_code,
+        mimetype='application/json'
+    )
+    abort(response)
+
+
+def create_epub(jnc_user, jnc_url, part_spec):
     """Create an epub file from a J-Novel Club URL and part specifier"""
     timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M_%f')
-    output_dirpath = f"{output_root}/{request.remote_addr}/{timestamp}"
+    output_dirpath = fr"{output_root}\{request.remote_addr}\{timestamp}"
     Path.mkdir(Path(output_dirpath), parents=True, exist_ok=True)
     logger.info(f"Generating epub(s) at {output_dirpath}")
     # Pass input to jncep per https://github.com/pallets/click/issues/40#issuecomment-326014129
-    generate_epub.callback(jnc_url, args["email"], args["password"], part_spec, output_dirpath,
-                           args["is_by_volume"], args["is_extract_images"],
-                           args["is_extract_content"], args["is_not_replace_chars"],
-                           args["style_css_path"])
+    try:
+        generate_epub.callback(jnc_url, jnc_user["email"], jnc_user["password"], part_spec,
+                               output_dirpath, args["is_by_volume"], args["is_extract_images"],
+                               args["is_extract_content"], args["is_not_replace_chars"],
+                               args["style_css_path"])
+    except BadWebURLError as exception:
+        return terminate_request(exception)
     logger.info("Epub(s) generated")
     return output_dirpath
 
@@ -52,26 +71,47 @@ def make_one_bytesio_file(directory):
     return memory_file, f"{files[0].stem[:files[0].stem.index('_Volume_')]}.zip"
 
 
+def get_credentials(request_args=None):
+    """Gets J-Novel Club user credentials.
+    Uses environment variables if present, overriding with request args if provided"""
+    logger.info("Reading J-Novel Club credentials")
+    # os.getenv returns 'None' if not present
+    jnc_user = {"email": os.getenv("JNCEP_EMAIL"), "password": os.getenv("JNCEP_PASSWORD")}
+    if request_args is not None:
+        if "JNCEP_EMAIL" in request_args:
+            jnc_user["email"] = request_args["JNCEP_EMAIL"]
+        if "JNCEP_PASSWORD" in request_args:
+            jnc_user["password"] = request_args["JNCEP_PASSWORD"]
+    if jnc_user["email"] is None or jnc_user["password"] is None:
+        return terminate_request("J-Novel Club credentials missing", 401)
+    return jnc_user
+
+
 @app.route('/')
 def homepage():
     """Load homepage"""
     logger.debug(f"Requesting IP: {request.remote_addr}")
     logger.debug("Requested homepage")
+    # Read credentials, to terminate early if missing
+    get_credentials()
     return render_template('Homepage.html')
 
 
-@app.route('/', methods=['POST'])
+@app.route('/epub', methods=['GET'])
 def index():
     """User requested an ebook, process request and return their ebook as a download"""
     logger.info(f"Prepub parts requested by client: {request.remote_addr}")
-    logger.debug(f"Requested JNC URL: {request.form['jnovelclub_url']}")
-    if request.form.get("prepub_parts"):
-        logger.info(f"Requested parts: {request.form['prepub_parts']}")
+    logger.debug(f"Requested JNC URL: {request.args['jnovelclub_url']}")
+    if "prepub_parts" in request.args:
+        logger.info(f"Requested parts: {request.args['prepub_parts']}")
     else:
         logger.info("Requested ALL")
 
+    # Get user credentials
+    jnc_user = get_credentials(request.args)
+
     # Create the epub and store the save path
-    epub_path = create_epub(request.form['jnovelclub_url'], request.form['prepub_parts'])
+    epub_path = create_epub(jnc_user, request.args['jnovelclub_url'], request.args['prepub_parts'])
 
     # If multiple files, zip them up
     file_object, filename = make_one_bytesio_file(epub_path)
@@ -86,6 +126,7 @@ def index():
 
 class InterceptHandler(logging.Handler):
     """Intercept the stdlib logger"""
+
     def emit(self, record):
         """Intercept the stdlib logger"""
         # Get corresponding Loguru level if it exists
@@ -113,8 +154,7 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
                rotation="50 MB", compression="zip", retention="1 week")
 
-    args = {"email": os.environ['JNCEP_EMAIL'], "password": os.environ['JNCEP_PASSWORD'],
-            "is_by_volume": True, "is_extract_images": False, "is_extract_content": False,
+    args = {"is_by_volume": True, "is_extract_images": False, "is_extract_content": False,
             "is_not_replace_chars": False, "style_css_path": False}
 
     if "JNCEP_OUTPUT" in os.environ:
