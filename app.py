@@ -1,4 +1,5 @@
 """JNCEP as a web application"""
+import asyncio
 import logging
 import os
 import shutil
@@ -9,9 +10,13 @@ from io import BytesIO
 from pathlib import Path
 from urllib.parse import unquote
 
+import requests
+from asks.errors import BadStatus
 from flask import Flask, send_file, render_template, request, abort, json
 from jncep.cli.epub import generate_epub
-from jncep.jncweb import BadWebURLError
+from jncep.core import JNCEPSession, resolve_series, fetch_meta, to_part_spec
+from jncep.jncweb import BadWebURLError, resource_from_url
+from jncep.spec import analyze_part_specs
 from loguru import logger
 from waitress import serve
 
@@ -33,6 +38,54 @@ def terminate_request(message, status_code=200):
     abort(response)
 
 
+async def get_volume_id(jnc_user, jnc_url, part_spec):
+    async with JNCEPSession(jnc_user['email'], jnc_user['password']) as session:
+        jnc_resource = resource_from_url(jnc_url)
+        series_id = await resolve_series(session, jnc_resource)
+        series = await fetch_meta(session, series_id)
+
+    if part_spec:
+        part_spec_analyzed = analyze_part_specs(part_spec)
+        part_spec_analyzed.normalize_and_verify(series)
+    else:
+        part_spec_analyzed = await to_part_spec(series, jnc_resource)
+    return part_spec_analyzed.volume_id
+
+
+def purchase_and_download(jnc_user, jnc_url, part_spec, output_dirpath):
+    """Purchase and download book
+
+    Notable responses:
+      204: Success
+      401: Unauthorized
+      410: Session token expired
+      404: Volume not found
+      501: Can't buy manga at this time
+      402: Not enough coins to purchase
+      409: Already own this volume
+      500: Internal server error (reported to us)
+      Other: Unknown server error
+    """
+
+    volume_id = asyncio.run(get_volume_id(jnc_user, jnc_url, part_spec))
+
+    user_data = requests.post("https://api.j-novel.club/api/users/login?include=user",
+                              headers={'Accept': 'application/json', 'content-type': 'application/json'},
+                              json={'email': jnc_user['email'], 'password': jnc_user['password']}).json()
+    response = requests.post('https://labs.j-novel.club/app/v1/me/coins/redeem/%s?format=json' % volume_id,
+                             headers={'Authorization': f'Bearer {user_data["id"]}'})
+
+    if not response.ok:
+        logger.warning(f'Error when ordering book. Response was: {response.status_code}')
+    else:
+        logger.info("Book purchased")
+        generate_epub.callback(jnc_url, jnc_user["email"], jnc_user["password"], part_spec,
+                               output_dirpath, args["is_by_volume"], args["is_extract_images"],
+                               args["is_extract_content"], args["is_not_replace_chars"],
+                               args["style_css_path"])
+        logger.info("Epub(s) generated")
+
+
 def create_epub(jnc_user, jnc_url, part_spec):
     """Create an epub file from a J-Novel Club URL and part specifier"""
     timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M_%f')
@@ -45,9 +98,15 @@ def create_epub(jnc_user, jnc_url, part_spec):
                                output_dirpath, args["is_by_volume"], args["is_extract_images"],
                                args["is_extract_content"], args["is_not_replace_chars"],
                                args["style_css_path"])
+        logger.info("Epub(s) generated")
     except BadWebURLError as exception:
         return terminate_request(exception)
-    logger.info("Epub(s) generated")
+    except BadStatus as exception:
+        if "Payment Required" in exception.args[0]:
+
+            logger.info("Purchasing book")
+
+            purchase_and_download(jnc_user, jnc_url, part_spec, output_dirpath)
     return output_dirpath
 
 

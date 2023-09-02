@@ -47,10 +47,10 @@ To get a local copy up and running there are two options, native or docker.
 4. Installation complete. Run `app.py`.
 
 #### Docker:
-1. Install the [bradleyds2/jncep_webui](https://hub.docker.com/repository/docker/bradleyds2/jncep_webui) docker container
+1. Install the [naruzosa/jncep_webui](https://hub.docker.com/repository/docker/naruzosa/jncep_webui) docker container
    1. A docker-compose.yml is provided in this project for your convenience.
 2. It is strongly recommended (but not required) to mount the container path `/logs`.
-   1. Logs will automatically be compressed once they reach 50MB, and will be deleted once they are a week old.
+   1. Logs will automatically be compressed once they reach 50MB, and old logs will be deleted once they are a week old, when a new message is logged.
 3. Installation completed, start the container
 
 
@@ -96,7 +96,7 @@ Once received, the app will process your request and respond with your epub/zip.
 
 ## Roadmap
 - [X] Create documentation
-- [ ] Push the Docker image to Docker Hub
+- [X] Push the Docker image to Docker Hub
   - [ ] Automatically build and push docker image with GitHub Actions
   - [ ] Create an Unraid Community Applications template with the Docker image
 - [ ] Provide as an installable program (using [PyInstaller](https://github.com/pyinstaller/pyinstaller) and [Inno Setup](https://github.com/jrsoftware/issrc))
