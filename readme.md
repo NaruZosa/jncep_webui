@@ -41,7 +41,7 @@ To get a local copy up and running there are two options, native or docker.
 1. Install Python 3 (tested with 3.10)
 2. Clone the repo
    ```cmd
-   git clone https://github.com/bradleyds2/jncep_webui.git
+   git clone https://github.com/NaruZosa/jncep_webui.git
    ```
 3. Install python requirements with `python -m pip install requirements.txt`
 4. Installation complete. Run `app.py`.
@@ -74,7 +74,7 @@ If the parts go over one volume, each volume will have its own epub, and these w
 Once the epub or zip has been generated, this will be served to the user. The process of generating and sending the epub usually takes a few seconds.
 
 #### As a web API
-Following the same rules as `As an application` above, it is possible to use `jncep_webui` as a web API by sending a GET request to ip-address:5000/epub on the host machine, with the following request headers:
+Following the same rules as `As an application` above, it is possible to use `jncep_webui` as a web API by sending either a GET or POST request to ip-address:5000/epub on the host machine, with the following request headers:
 
 | Name             | Required | Description                                     |
 |------------------|----------|-------------------------------------------------|
@@ -97,10 +97,11 @@ Once received, the app will process your request and respond with your epub/zip.
 ## Roadmap
 - [X] Create documentation
 - [ ] Push the Docker image to Docker Hub
+  - [ ] Automatically build and push docker image with GitHub Actions
   - [ ] Create an Unraid Community Applications template with the Docker image
 - [ ] Provide as an installable program (using [PyInstaller](https://github.com/pyinstaller/pyinstaller) and [Inno Setup](https://github.com/jrsoftware/issrc))
 
-See the [open issues](https://github.com/BradleyDS2/jncep_webui/issues) for a full list of proposed features (and known issues).
+See the [open issues](https://github.com/NaruZosa/jncep_webui/issues) for a full list of proposed features (and known issues).
 
 
 
@@ -126,7 +127,7 @@ jncep_webui is distributed under the GNU General Public License (GPL) version 3.
 
 ## Contact
 
-Project Link: [https://github.com/BradleyDS2/jncep_webui](https://github.com/BradleyDS2/jncep_webui)
+Project Link: [https://github.com/NaruZosa/jncep_webui](https://github.com/NaruZosa/jncep_webui)
 
 
 

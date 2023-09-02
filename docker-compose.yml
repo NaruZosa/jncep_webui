@@ -1,7 +1,7 @@
 ---
 services:
   jncep-webui:
-    image: bradleyds2/jncep_webui
+    image: NaruZosa/jncep_webui
     environment:
       - JNCEP_EMAIL=${JNCEP_EMAIL}
       - JNCEP_PASSWORD=${JNCEP_PASSWORD}

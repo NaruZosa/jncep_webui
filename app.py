@@ -7,6 +7,7 @@ import zipfile
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
+from urllib.parse import unquote
 
 from flask import Flask, send_file, render_template, request, abort, json
 from jncep.cli.epub import generate_epub
@@ -97,21 +98,25 @@ def homepage():
     return render_template('Homepage.html')
 
 
-@app.route('/epub', methods=['GET'])
+@app.route('/epub', methods=['GET', 'POST'])
 def index():
     """User requested an ebook, process request and return their ebook as a download"""
     logger.info(f"Prepub parts requested by client: {request.remote_addr}")
-    logger.debug(f"Requested JNC URL: {request.args['jnovelclub_url']}")
-    if "prepub_parts" in request.args:
-        logger.info(f"Requested parts: {request.args['prepub_parts']}")
+    # noinspection PyTypeChecker
+    request_args = request.args.to_dict(flat=True)
+    request_args['jnovelclub_url'] = unquote(request_args['jnovelclub_url'])
+    logger.debug(f"Requested JNC URL: {request_args['jnovelclub_url']}")
+    if "prepub_parts" in request_args and request_args["prepub_parts"] != "":
+        logger.info(f"Requested parts: {request_args['prepub_parts']}")
     else:
         logger.info("Requested ALL")
+        request_args['prepub_parts'] = ''
 
     # Get user credentials
-    jnc_user = get_credentials(request.args)
+    jnc_user = get_credentials(request_args)
 
     # Create the epub and store the save path
-    epub_path = create_epub(jnc_user, request.args['jnovelclub_url'], request.args['prepub_parts'])
+    epub_path = create_epub(jnc_user, request_args['jnovelclub_url'], request_args['prepub_parts'])
 
     # If multiple files, zip them up
     file_object, filename = make_one_bytesio_file(epub_path)
