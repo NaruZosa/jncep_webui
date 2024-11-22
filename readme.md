@@ -1,141 +1,166 @@
 # JNCEP WebUI
 
 ![Logo](images/logo.png)
-Image generated with the use of DALL·E
+*Image generated using DALL·E.*
 
+---
 
+## 📖 About The Project
 
-## About The Project
-This is a flask app to generate EPUB files for J-Novel Club pre-pub novels by providing an interface to `jncep`.
+**JNCEP WebUI** is a Flask-based web application designed to generate EPUB files for J-Novel Club pre-pub novels. It provides a user-friendly interface for the `jncep` tool, enabling seamless EPUB creation.
 
-I find myself using this when a new prepub drops, as I prefer to read on an e-reader, but I may not able to access a computer immediately after the prepub part comes out.
+This app is perfect for readers who want to enjoy new pre-pubs on their e-reader immediately after release, even when a computer isn't accessible. If hosted on a server, it allows you to download pre-pubs directly to your phone and transfer them to an e-reader via a USB cable.
 
-If this app is running on a server, you can download pre-pubs to your phone then copy them to your e-reader with a USB OTG cable.
+---
 
+## ⚠️ Limitations & Disclaimer
 
+- This tool supports J-Novel Club **novels only**—manga is not supported.
+- **`jncep_webui` is unaffiliated with J-Novel Club and jncep.**  
+  For issues related to this tool, please file a bug report on this project's repository, not with jncep.
 
-## Limitations & Disclaimer
-This tool only works with J-Novel Club **novels**, not manga.
+---
 
-`jncep_webui` is completely unaffiliated with J-Novel Club and jncep.
-If you have an issue with the tool, please file a bug report on this project, not jncep.
+## 🚀 Getting Started
 
-
-
-## Getting Started
-To get a local copy up and running there are two options, native or docker.
+To set up JNCEP WebUI, you have two installation options: **native installation** or **Docker**.
 
 ### Prerequisites
-* J-Novel Club account and membership
-* Set the following environment variables:
-  
-| Name             | Required | Description                                                           |
-|------------------|----------|-----------------------------------------------------------------------|
-| `JNCEP_EMAIL`    | Yes      | Login email for J-Novel Club account                                  |
-| `JNCEP_PASSWORD` | Yes      | Login password for J-Novel Club account                               |
-| `JNCEP_OUTPUT`   | No       | Folder to save the generated files before sending<br>Default: /output |
 
+- A J-Novel Club account with an active membership.
+- Configure the following environment variables:
 
-### Installation
-#### Native:
-1. Install Python 3 (tested with 3.10)
-2. Clone the repo
-   ```cmd
+| **Variable Name** | **Required** | **Description** |
+|-------------------|--------------|------------------|
+| `JNCEP_EMAIL`    | Yes          | Your J-Novel Club account login email. |
+| `JNCEP_PASSWORD` | Yes          | Your J-Novel Club account login password. |
+| `JNCEP_OUTPUT`   | No           | Directory for saving generated files before they are served. Default: `/output`. |
+
+---
+
+### 🛠️ Installation
+
+#### Native Installation
+
+1. Install Python 3 (tested with Python 3.12).
+2. Clone the repository:
+   ```bash
    git clone https://github.com/NaruZosa/jncep_webui.git
    ```
-3. Install python requirements with `python -m pip install requirements.txt`
-4. Installation complete. Run `app.py`.
+3. Install the Python dependencies:
+   ```bash
+   python -m pip install -r requirements.txt
+   ```
+4. Run the application:
+   ```bash
+   python app.py
+   ```
 
-#### Docker:
-1. Install the [naruzosa/jncep_webui](https://hub.docker.com/repository/docker/naruzosa/jncep_webui) docker container
-   1. A docker-compose.yml is provided in this project for your convenience.
-2. It is strongly recommended (but not required) to mount the container path `/logs`.
-   1. Logs will automatically be compressed once they reach 50MB, and old logs will be deleted once they are a week old, when a new message is logged.
-3. Installation completed, start the container
+#### Docker Installation
 
+1. Pull the Docker container from [Docker Hub](https://github.com/NaruZosa/jncep_webui/pkgs/container/jncep_webui).  
+   A pre-configured `compose.yml` file is included in this repository for your convenience.
+2. (Optional) Mount the `/logs` container path for logging:
+   - Logs will automatically compress when they reach 50MB.
+   - Logs older than one week will be deleted when new logs are created.
+3. Start the container.
 
+---
 
-## Usage
-### General
-This uses jncep to create the epub. If you want to know more about how the part specification works, check out the documentation for it [here](https://github.com/gvellut/jncep#range-of-parts).
-#### As an Application
-Once started, `jncep_webui` will be available at port 5000.
-![img.png](images/webui.png)
-This page has two fields for input:
+## 📚 Usage
 
-| Name             | Required | Description                                                                                                                |
-|------------------|----------|----------------------------------------------------------------------------------------------------------------------------|
-| J-Novel Club URL | Yes      | The J-Novel Club URL for the series, volume or part                                                                        |
-| Prepub parts     | No       | Range of parts to download in the form of <vol>[.part]:<vol>[.part] <br>Default: All content linked to `J-Novel Club URL`] |
+### Web Application
+JNCEP WebUI uses jncep to create the epub. If you want to know more about how the part specification works, check out the documentation for it [here](https://github.com/gvellut/jncep#range-of-parts).
 
+**JNCEP WebUI** runs on port `5000`. Access the interface at `http://localhost:5000`.  
 
-Once the `J-Novel Club URL`, and (optionally) the `Prepub parts` field have been filled, click submit to generate your epub.
-If the parts go over one volume, each volume will have its own epub, and these will be added to a zip.
-Once the epub or zip has been generated, this will be served to the user. The process of generating and sending the epub usually takes a few seconds.
+![WebUI](images/webui.png)
 
-#### As a web API
-Following the same rules as `As an application` above, it is possible to use `jncep_webui` as a web API by sending either a GET or POST request to ip-address:5000/epub on the host machine, with the following request headers:
+#### Input Fields:
 
-| Name             | Required | Description                                     |
-|------------------|----------|-------------------------------------------------|
-| `jnovelclub_url` | Yes      | Maps to `J-Novel Club URL` above                |
-| `prepub_parts`   | No       | Maps to `Prepub parts` above                    |
-| `JNCEP_EMAIL`    | No       | Overrides `JNCEP_EMAIL` environment variable    |
-| `JNCEP_PASSWORD` | No       | Overrides `JNCEP_PASSWORD` environment variable |
+| **Field**            | **Required** | **Description**                                                                                 |
+|----------------------|--------------|-------------------------------------------------------------------------------------------------|
+| `J-Novel Club URL`   | Yes          | The URL for the J-Novel Club series, volume, or part.                                           |
+| `Prepub Parts`       | No           | Range of parts to download (e.g., `<vol>[.part]:<vol>[.part]`). Defaults to all parts for the specified URL. |
 
+#### Steps to Generate EPUB:
 
-Examples:
-* With parts specified:
-  * http://localhost:5000/epub?jnovelclub_url=https%3A%2F%2Fj-novel.club%2Fseries%2Fwhy-shouldn-t-a-detestable-demon-lord-fall-in-love&prepub_parts=4.1
-* Grab all parts
-  * http://localhost:5000/epub?jnovelclub_url=https%3A%2F%2Fj-novel.club%2Fseries%2Fwhy-shouldn-t-a-detestable-demon-lord-fall-in-love
+1. Enter the **J-Novel Club URL**.
+2. (Optional) Specify the **Prepub Parts**.
+3. Click **Submit** to generate the EPUB.
 
-Once received, the app will process your request and respond with your epub/zip.
+If the parts span multiple volumes, each volume will be compiled into a separate EPUB, and all files will be bundled into a ZIP. The generated file will be served for download, typically within a few seconds.
 
+---
 
+### Web API
 
-## Roadmap
-- [X] Create documentation
-- [X] Push the Docker image to Docker Hub
-  - [ ] Automatically build and push docker image with GitHub Actions
-  - [ ] Create an Unraid Community Applications template with the Docker image
-- [ ] Provide as an installable program (using [PyInstaller](https://github.com/pyinstaller/pyinstaller) and [Inno Setup](https://github.com/jrsoftware/issrc))
+**JNCEP WebUI** can also function as a web API. Send a GET or POST request to `http://<host>:5000/epub` with the following headers:
 
-See the [open issues](https://github.com/NaruZosa/jncep_webui/issues) for a full list of proposed features (and known issues).
+| **Header**          | **Required** | **Description**                                    |
+|---------------------|--------------|--------------------------------------------------|
+| `jnovelclub_url`    | Yes          | Maps to the `J-Novel Club URL` field.             |
+| `prepub_parts`      | No           | Maps to the `Prepub Parts` field.                |
+| `JNCEP_EMAIL`       | No           | Overrides the `JNCEP_EMAIL` environment variable. |
+| `JNCEP_PASSWORD`    | No           | Overrides the `JNCEP_PASSWORD` environment variable. |
 
+#### Example API Requests:
 
+- With parts specified:
+  ```
+  http://localhost:5000/epub?jnovelclub_url=<series_url>&prepub_parts=4.1
+  ```
+- To download all parts:
+  ```
+  http://localhost:5000/epub?jnovelclub_url=<series_url>
+  ```
 
-## Contributing
+The response will include the generated EPUB or ZIP file.
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+---
 
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
+## 🛤️ Roadmap
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+- [X] Add documentation.
+- [X] Publish Docker image.
+  - [X] Automate Docker builds with GitHub Actions.
+  - [ ] Add an Unraid Community Applications template.
+- [ ] Create an installable application using [PyInstaller](https://github.com/pyinstaller/pyinstaller) and [Inno Setup](https://github.com/jrsoftware/issrc).
+- [ ] Use uv for dependency management and building (once integrated into PyCharm)
 
+For more details, check out the [open issues](https://github.com/NaruZosa/jncep_webui/issues).
 
+---
 
-## License
-jncep_webui is distributed under the GNU General Public License (GPL) version 3. See `LICENSE.txt` for more information.
+## 🤝 Contributing
 
+Contributions are always welcome! Here’s how you can help:
 
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature/AmazingFeature`).
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
+4. Push to your branch (`git push origin feature/AmazingFeature`).
+5. Open a pull request.
 
-## Contact
+Don’t forget to star the repository if you find it helpful! 😊
 
-Project Link: [https://github.com/NaruZosa/jncep_webui](https://github.com/NaruZosa/jncep_webui)
+---
 
+## 📜 License
 
+This project is distributed under the **GNU General Public License (GPL) v3**. See `LICENSE.txt` for details.
 
-## Special Thanks
-This would not have been possible without the hard work of gvellut in creating [jncep](https://github.com/gvellut/jncep), which does all the heavy lifting, thank you!
+---
 
-Thank you to Delgan for [Loguru](https://github.com/Delgan/loguru), it made logging dead-simple
+## 📝 Acknowledgments
 
-Thank you to othneildrew for the [readme.md template](https://github.com/othneildrew/Best-README-Template)
+- **[gvellut](https://github.com/gvellut/jncep)** for creating `jncep`, which does all the heavy lifting, thank you!
+- **[Delgan](https://github.com/Delgan/loguru)** for `Loguru`, it makes logging dead-simple.
+- **[othneildrew](https://github.com/othneildrew/Best-README-Template)** for the readme template.
+- **[J-Novel Club](https://j-novel.club/)** for their translations and public API.
 
-And a final thank you to [J-Novel Club](https://j-novel.club/) for your translations and public API!
+---
+
+## 📬 Contact
+
+Project Repository: [JNCEP WebUI](https://github.com/NaruZosa/jncep_webui)

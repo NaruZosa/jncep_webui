@@ -1,10 +1,14 @@
 ---
 services:
   jncep-webui:
-    image: naruzosa/jncep_webui
+    image: ghcr.io/naruzosa/jncep_webui
+    build: # Fallback in case the image is unavailable
+      context: .
+      dockerfile: Dockerfile
     environment:
       - JNCEP_EMAIL=${JNCEP_EMAIL}
       - JNCEP_PASSWORD=${JNCEP_PASSWORD}
+      - PYTHONUNBUFFERED=1
     ports:
       - "5000:5000"
     volumes:
