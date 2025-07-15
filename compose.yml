@@ -1,7 +1,7 @@
 ---
 services:
   jncep-webui:
-    image: ghcr.io/naruzosa/jncep_webui
+    image: ghcr.io/naruzosa/jncep_webui:latest
     build: # Fallback in case the image is unavailable
       context: .
       dockerfile: Dockerfile

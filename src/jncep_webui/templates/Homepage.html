@@ -3,7 +3,7 @@
 	<head>
 		<title>Prepub Downloader</title>
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-		<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+		<link rel="favicon" href="{{ url_for('static', filename='favicon.ico') }}">
 	</head>
 
 	<body>
@@ -24,12 +24,12 @@
 						</div>
 					</fieldset>
                     <footer id="footer">
-                        Parts:
-                        <br>
-                        Specify a range of parts to download in the form of [vol].[part]:[vol].[part]
+                        Parts: Specify a range of parts to download in the form of [vol].[part] or [vol].[part]:[vol].[part]
                         <br>
                         Default: All the content linked by the URL. This will be a single part, a volume or the whole series
                         <br>
+                        <br>
+                        Specifications for how parts can be defined are listed <a href="https://github.com/gvellut/jncep#range-of-parts">here</a>
                     </footer>
 				</form>
 			</div>

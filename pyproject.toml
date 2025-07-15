@@ -1,0 +1,62 @@
+[project]
+name = "jncep-webui"
+version = "53"
+description = "A simple web UI wrapper around JNCEP."
+authors = [
+    { name = "NaruZosa", email = "bradleydsepic@hotmail.com" }
+]
+readme = "readme.md"
+license = "GPL-3.0-only"
+requires-python = ">=3.13"
+keywords = ["ebook", "webui", "jncep", "flask"]
+dependencies = [
+    "flask==3.1.1",
+    "waitress==3.0.2",
+    "jncep==53",
+    "loguru==0.7.3",
+]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Framework :: Flask",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.12.3",
+    "basedmypy",
+    "types_waitress>=3.0.1.20241117",
+    "pyinstaller>=6.14.2",
+    "basedpyright>=1.30.1",
+    "deptry>=0.23.0"
+]
+
+[project.urls]
+"Homepage" = "https://pypi.org/project/jncep-webui/"
+"Source" = "https://github.com/NaruZosa/jncep-webui"
+"Issues" = "https://github.com/NaruZosa/jncep-webui/issues"
+
+
+
+[build-system]
+requires = ["uv-build>=0.7.20,<0.8.0"]
+build-backend = "uv_build"
+
+[tool.ruff]
+target-version = "py312"
+
+[tool.ruff.lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`) codes by default.
+# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
+# McCabe complexity (`C901`) by default.
+select = ["ALL"]
+ignore = ["E501", "D203", "D213", "D202", "DOC502", "CPY001"]
+
+
+[tool.deptry.per_rule_ignores]
+DEP002 = ["ruff", "mypy", "types_waitress", "pyinstaller"]
+DEP003 = ["jncep_webui"]
