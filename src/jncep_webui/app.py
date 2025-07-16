@@ -36,8 +36,11 @@ from waitress import serve
 from jncep_webui.logger_setup import setup_logging
 
 # TODO(naruzosa): Make test cases
+# https://github.com/NaruZosa/jncep_webui/issues/2
 # TODO(naruzosa): Create pyinstaller spec file for packaging
+# https://github.com/NaruZosa/jncep_webui/issues/3
 # TODO(naruzosa): Add optional email and password fields to the homepage
+# https://github.com/NaruZosa/jncep_webui/issues/4
 
 
 JNC_URL_PATTERN = re.compile(r"^https://j-novel\.club/(read|series)/[a-z0-9-]+", re.IGNORECASE)
@@ -90,6 +93,7 @@ class TerminateRequestError(Exception):
 @app.errorhandler(TerminateRequestError)
 def handle_terminate_request_error(error: TerminateRequestError) -> Response:
     """Handle a custom exception by returning a JSON response."""
+    logger.exception(error)
     return error.response
 
 
@@ -319,7 +323,3 @@ def main() -> None:
     _ = signal.signal(signal.SIGTERM, terminate)
     setup_logging()
     serve(app, host="0.0.0.0", port=5000)  # noqa: S104
-
-
-if __name__ == "__main__":
-    main()
